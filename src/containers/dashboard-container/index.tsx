@@ -36,10 +36,19 @@ export const DashboardContainer: React.FC = () => {
   // Modals & State
   const [selectedBook, setSelectedBook] = useState<Book | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState<boolean>(false);
-  const [editingNotes, setEditingNotes] = useState<string>("");
-  const [isEditingNotesModal, setIsEditingNotesModal] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [apiError, setApiError] = useState<string>("");
+
+  // Edit Book Modal State
+  const [isEditMode, setIsEditMode] = useState<boolean>(false);
+  const [editTitle, setEditTitle] = useState("");
+  const [editAuthor, setEditAuthor] = useState("");
+  const [editDescription, setEditDescription] = useState("");
+  const [editTags, setEditTags] = useState("");
+  const [editStatus, setEditStatus] = useState<BookStatus>("Reading");
+  const [editNotes, setEditNotes] = useState("");
+  const [editCoverFile, setEditCoverFile] = useState<File | null>(null);
+  const [editCoverPreview, setEditCoverPreview] = useState<string>("");
 
   // Form State for Adding New Book
   const [newTitle, setNewTitle] = useState("");
@@ -120,8 +129,8 @@ export const DashboardContainer: React.FC = () => {
       const tagsList = Array.isArray(book.tags)
         ? book.tags
         : typeof book.tags === "string"
-        ? (book.tags as string).split(",").map((t) => t.trim())
-        : [];
+          ? (book.tags as string).split(",").map((t) => t.trim())
+          : [];
 
       const matchesSearch =
         searchLower === "" ||
@@ -152,7 +161,22 @@ export const DashboardContainer: React.FC = () => {
   // Handlers
   const handleOpenDetailModal = (book: Book) => {
     setSelectedBook(book);
-    setEditingNotes(book.notes || "");
+    setIsEditMode(false);
+    setApiError("");
+    setEditTitle(book.title || "");
+    setEditAuthor(book.author || "");
+    setEditDescription(book.description || "");
+    setEditTags(
+      Array.isArray(book.tags)
+        ? book.tags.join(", ")
+        : typeof book.tags === "string"
+          ? book.tags
+          : ""
+    );
+    setEditStatus(book.status || "Reading");
+    setEditNotes(book.notes || "");
+    setEditCoverFile(null);
+    setEditCoverPreview("");
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -165,45 +189,64 @@ export const DashboardContainer: React.FC = () => {
     }
   };
 
-  const handleSaveNotes = async () => {
+  const handleEditCoverChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    setEditCoverFile(file);
+    if (file) {
+      setEditCoverPreview(URL.createObjectURL(file));
+    } else {
+      setEditCoverPreview("");
+    }
+  };
+
+  const handleSaveFullBook = async () => {
     if (!selectedBook) return;
     setIsSubmitting(true);
+    setApiError("");
     try {
       const formData = new FormData();
       formData.append("book_generated_id", selectedBook.book_generated_id);
-      formData.append("notes", editingNotes);
-      formData.append("title", selectedBook.title);
-      formData.append("author", selectedBook.author);
-      formData.append("status", selectedBook.status);
-      formData.append("description", selectedBook.description || "");
-      if (selectedBook.cover_image) {
+      formData.append("title", editTitle.trim());
+      formData.append("author", editAuthor.trim());
+      formData.append("description", editDescription.trim());
+      formData.append("status", editStatus);
+      formData.append("tags", editTags.trim());
+      formData.append("notes", editNotes.trim());
+
+      if (editCoverFile) {
+        formData.append("cover_image", editCoverFile);
+      } else if (selectedBook.cover_image) {
         formData.append("cover_image", selectedBook.cover_image);
-      }
-      if (Array.isArray(selectedBook.tags)) {
-        formData.append("tags", selectedBook.tags.join(", "));
-      } else if (typeof selectedBook.tags === "string") {
-        formData.append("tags", selectedBook.tags);
       }
 
       await updateBookContext(formData);
       await fetchBooks();
 
+      const updatedTagsList = editTags
+        ? editTags.split(",").map((t) => t.trim()).filter(Boolean)
+        : [];
+
+      const updatedCoverPath = editCoverPreview || selectedBook.cover_image;
+
       setSelectedBook((prev) =>
-        prev ? { ...prev, notes: editingNotes, cover_image: prev.cover_image || selectedBook.cover_image } : null
+        prev
+          ? {
+            ...prev,
+            title: editTitle.trim(),
+            author: editAuthor.trim(),
+            description: editDescription.trim(),
+            status: editStatus,
+            tags: updatedTagsList,
+            notes: editNotes.trim(),
+            cover_image: updatedCoverPath,
+          }
+          : null
       );
-      setIsEditingNotesModal(false);
+      setIsEditMode(false);
     } catch (err: any) {
-      setBooks((prev) =>
-        prev.map((b) =>
-          b.book_generated_id === selectedBook.book_generated_id || b._id.$oid === selectedBook._id.$oid
-            ? { ...b, notes: editingNotes, cover_image: b.cover_image || selectedBook.cover_image }
-            : b
-        )
-      );
-      setSelectedBook((prev) =>
-        prev ? { ...prev, notes: editingNotes, cover_image: prev.cover_image || selectedBook.cover_image } : null
-      );
-      setIsEditingNotesModal(false);
+      const errMessage =
+        typeof err === "string" ? err : err?.message || err?.error || "Failed to update book.";
+      setApiError(errMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -229,23 +272,19 @@ export const DashboardContainer: React.FC = () => {
 
       await updateBookContext(formData);
       await fetchBooks();
+
+      setEditStatus(newStat);
+      setSelectedBook((prev) =>
+        prev ? { ...prev, status: newStat } : null
+      );
     } catch (err) {
       setBooks((prev) =>
         prev.map((b) =>
           b.book_generated_id === book.book_generated_id || b._id.$oid === book._id.$oid
-            ? { ...b, status: newStat, cover_image: b.cover_image || book.cover_image }
+            ? { ...b, status: newStat }
             : b
         )
       );
-    } finally {
-      if (
-        selectedBook &&
-        (selectedBook.book_generated_id === book.book_generated_id || selectedBook._id.$oid === book._id.$oid)
-      ) {
-        setSelectedBook((prev) =>
-          prev ? { ...prev, status: newStat, cover_image: prev.cover_image || book.cover_image } : null
-        );
-      }
     }
   };
 
@@ -551,8 +590,8 @@ export const DashboardContainer: React.FC = () => {
                     const bookTags = Array.isArray(book.tags)
                       ? book.tags
                       : typeof book.tags === "string"
-                      ? (book.tags as string).split(",").map((t) => t.trim())
-                      : [];
+                        ? (book.tags as string).split(",").map((t) => t.trim())
+                        : [];
 
                     return (
                       <div key={book._id?.$oid || book.book_generated_id} className="shelf-item">
@@ -610,81 +649,211 @@ export const DashboardContainer: React.FC = () => {
         </main>
       </div>
 
-      {/* Book Detail Modal */}
-      {selectedBook && !isEditingNotesModal && (
+      {/* Book Detail & Edit Modal */}
+      {selectedBook && (
         <div className="woody-modal-backdrop" onClick={() => setSelectedBook(null)}>
-          <div className="woody-modal" onClick={(e) => e.stopPropagation()}>
+          <div className="woody-modal woody-modal--lg" onClick={(e) => e.stopPropagation()}>
             <div className="woody-modal__header">
-              <h2 className="woody-modal__title">Book Overview</h2>
-              <button className="woody-modal__close" onClick={() => setSelectedBook(null)}>✕</button>
-            </div>
-
-            <div className="woody-modal__body">
-              <div className="modal-hero">
-                <div className="modal-hero__cover">
-                  {getImageUrl(selectedBook.cover_image) ? (
-                    <img src={getImageUrl(selectedBook.cover_image)} alt={selectedBook.title} />
-                  ) : (
-                    <div className="modal-leather-spine">
-                      <span className="spine-title">{selectedBook.title}</span>
-                      <span className="spine-author">{selectedBook.author}</span>
-                    </div>
-                  )}
-                </div>
-
-                <div className="modal-hero__info">
-                  <h3>{selectedBook.title}</h3>
-                  <p className="modal-author">by {selectedBook.author}</p>
-                  <div className="modal-tags">
-                    {(Array.isArray(selectedBook.tags)
-                      ? selectedBook.tags
-                      : typeof selectedBook.tags === "string"
-                      ? (selectedBook.tags as string).split(",")
-                      : []
-                    ).map((t) => (
-                      <span key={t} className="shelf-tag-chip">#{t.trim()}</span>
-                    ))}
-                  </div>
-
-                  <div className="modal-status-select-wrap">
-                    <label>Change Status:</label>
-                    <select
-                      className="woody-select"
-                      value={selectedBook.status}
-                      onChange={(e) => handleUpdateStatus(selectedBook, e.target.value as BookStatus)}
-                    >
-                      <option value="Reading">Reading</option>
-                      <option value="Completed">Completed</option>
-                      <option value="Plan to Read">Plan to Read</option>
-                    </select>
-                  </div>
-                </div>
+              <div className="woody-modal-title-group">
+                <h2 className="woody-modal__title">
+                  {isEditMode ? "Edit Book Details" : "Book Overview"}
+                </h2>
+                <span className={`status-pill status-${selectedBook.status.toLowerCase().replace(/\s+/g, "-")}`}>
+                  {selectedBook.status}
+                </span>
               </div>
 
-              <div className="modal-field">
-                <label>Description</label>
-                <p>{selectedBook.description}</p>
-              </div>
-
-              <div className="modal-field">
-                <div className="modal-field-header">
-                  <label>Personal Notes</label>
+              <div className="modal-header-actions">
+                {!isEditMode ? (
                   <button
-                    className="edit-notes-link"
-                    onClick={() => {
-                      setEditingNotes(selectedBook.notes || "");
-                      setIsEditingNotesModal(true);
-                    }}
+                    className="woody-btn-edit-header"
+                    onClick={() => setIsEditMode(true)}
                   >
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
                       <path d="M12 20h9"></path>
                       <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
                     </svg>
-                    <span>Edit Notes</span>
+                    <span>Edit Book</span>
                   </button>
-                </div>
-                <div className="modal-notes-quote">&ldquo;{selectedBook.notes || "No notes added yet."}&rdquo;</div>
+                ) : (
+                  <button
+                    className="woody-btn-view-header"
+                    onClick={() => setIsEditMode(false)}
+                  >
+                    <span>View Overview</span>
+                  </button>
+                )}
+                <button className="woody-modal__close" onClick={() => setSelectedBook(null)}>✕</button>
               </div>
+            </div>
+
+            <div className="woody-modal__body">
+              {apiError && <div className="api-error-alert">{apiError}</div>}
+
+              {!isEditMode ? (
+                /* OVERVIEW MODE */
+                <div className="overview-container">
+                  <div className="modal-hero">
+                    <div className="modal-hero__cover">
+                      {getImageUrl(selectedBook.cover_image) ? (
+                        <img src={getImageUrl(selectedBook.cover_image)} alt={selectedBook.title} />
+                      ) : (
+                        <div className="modal-leather-spine">
+                          <span className="spine-title">{selectedBook.title}</span>
+                          <span className="spine-author">{selectedBook.author}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="modal-hero__info">
+                      <h3 className="modal-book-title">{selectedBook.title}</h3>
+                      <p className="modal-author">by {selectedBook.author}</p>
+
+                      <div className="modal-tags">
+                        {(Array.isArray(selectedBook.tags)
+                          ? selectedBook.tags
+                          : typeof selectedBook.tags === "string"
+                            ? (selectedBook.tags as string).split(",")
+                            : []
+                        ).map((t) => (
+                          <span key={t} className="shelf-tag-chip">#{t.trim()}</span>
+                        ))}
+                      </div>
+
+                      <div className="modal-status-select-wrap">
+                        <label>Change Status:</label>
+                        <select
+                          className="woody-select"
+                          value={selectedBook.status}
+                          onChange={(e) => handleUpdateStatus(selectedBook, e.target.value as BookStatus)}
+                        >
+                          <option value="Reading">Reading</option>
+                          <option value="Completed">Completed</option>
+                          <option value="Plan to Read">Plan to Read</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="modal-field">
+                    <label>Description</label>
+                    <p className="modal-description-text">
+                      {selectedBook.description || "No description provided."}
+                    </p>
+                  </div>
+
+                  <div className="modal-field">
+                    <div className="modal-field-header">
+                      <label>Personal Notes</label>
+                      {/* <button
+                        className="edit-notes-link"
+                        onClick={() => setIsEditMode(true)}
+                      >
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                          <path d="M12 20h9"></path>
+                          <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path>
+                        </svg>
+                        <span>Edit Details</span>
+                      </button> */}
+                    </div>
+                    <div className="modal-notes-quote">&ldquo;{selectedBook.notes || "No notes added yet."}&rdquo;</div>
+                  </div>
+                </div>
+              ) : (
+                /* EDIT MODE */
+                <div className="edit-container">
+                  <div className="form-row-2">
+                    <div className="modal-field">
+                      <label>Book Title *</label>
+                      <input
+                        type="text"
+                        className="woody-input"
+                        value={editTitle}
+                        onChange={(e) => setEditTitle(e.target.value)}
+                        placeholder="Book title"
+                      />
+                    </div>
+
+                    <div className="modal-field">
+                      <label>Author *</label>
+                      <input
+                        type="text"
+                        className="woody-input"
+                        value={editAuthor}
+                        onChange={(e) => setEditAuthor(e.target.value)}
+                        placeholder="Author name"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="form-row-2">
+                    <div className="modal-field">
+                      <label>Status</label>
+                      <select
+                        className="woody-input"
+                        value={editStatus}
+                        onChange={(e) => setEditStatus(e.target.value as BookStatus)}
+                      >
+                        <option value="Reading">Reading</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Plan to Read">Plan to Read</option>
+                      </select>
+                    </div>
+
+                    <div className="modal-field">
+                      <label>Tags (comma separated)</label>
+                      <input
+                        type="text"
+                        className="woody-input"
+                        value={editTags}
+                        onChange={(e) => setEditTags(e.target.value)}
+                        placeholder="e.g. Self Help, Productivity"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="modal-field">
+                    <label>Cover Image (Upload New or Keep Current)</label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      className="woody-input"
+                      onChange={handleEditCoverChange}
+                    />
+                    {(editCoverPreview || selectedBook.cover_image) && (
+                      <div className="thumbnail-preview-box">
+                        <span>Preview:</span>
+                        <img
+                          src={editCoverPreview || getImageUrl(selectedBook.cover_image)}
+                          alt="Cover Preview"
+                        />
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="modal-field">
+                    <label>Description</label>
+                    <textarea
+                      className="woody-textarea"
+                      rows={3}
+                      value={editDescription}
+                      onChange={(e) => setEditDescription(e.target.value)}
+                      placeholder="Book summary or description..."
+                    />
+                  </div>
+
+                  <div className="modal-field">
+                    <label>Personal Notes</label>
+                    <textarea
+                      className="woody-textarea"
+                      rows={3}
+                      value={editNotes}
+                      onChange={(e) => setEditNotes(e.target.value)}
+                      placeholder="Personal notes and key takeaways..."
+                    />
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="woody-modal__footer" style={{ justifyContent: "space-between" }}>
@@ -699,38 +868,31 @@ export const DashboardContainer: React.FC = () => {
                 </svg>
                 <span>Delete Book</span>
               </button>
-              <button className="woody-btn-secondary" onClick={() => setSelectedBook(null)}>Close</button>
-            </div>
-          </div>
-        </div>
-      )}
 
-      {/* Edit Notes Modal */}
-      {isEditingNotesModal && selectedBook && (
-        <div className="woody-modal-backdrop" onClick={() => setIsEditingNotesModal(false)}>
-          <div className="woody-modal" onClick={(e) => e.stopPropagation()}>
-            <div className="woody-modal__header">
-              <h2 className="woody-modal__title">Edit Notes: {selectedBook.title}</h2>
-              <button className="woody-modal__close" onClick={() => setIsEditingNotesModal(false)}>✕</button>
-            </div>
-
-            <div className="woody-modal__body">
-              <div className="modal-field">
-                <label>Notes & Key Takeaways</label>
-                <textarea
-                  className="woody-textarea"
-                  rows={5}
-                  value={editingNotes}
-                  onChange={(e) => setEditingNotes(e.target.value)}
-                />
+              <div style={{ display: "flex", gap: "10px" }}>
+                {isEditMode ? (
+                  <>
+                    <button
+                      className="woody-btn-secondary"
+                      onClick={() => setIsEditMode(false)}
+                      disabled={isSubmitting}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      className="woody-btn-primary"
+                      onClick={handleSaveFullBook}
+                      disabled={isSubmitting}
+                    >
+                      {isSubmitting ? "Saving Changes..." : "Save Changes"}
+                    </button>
+                  </>
+                ) : (
+                  <button className="woody-btn-secondary" onClick={() => setSelectedBook(null)}>
+                    Close
+                  </button>
+                )}
               </div>
-            </div>
-
-            <div className="woody-modal__footer">
-              <button className="woody-btn-secondary" onClick={() => setIsEditingNotesModal(false)}>Cancel</button>
-              <button className="woody-btn-primary" onClick={handleSaveNotes} disabled={isSubmitting}>
-                {isSubmitting ? "Saving..." : "Save Notes"}
-              </button>
             </div>
           </div>
         </div>
