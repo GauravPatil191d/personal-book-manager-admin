@@ -1,0 +1,259 @@
+@import url("https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Lora:wght@400;500&display=swap");
+
+:root {
+  --pbm-cream: #f6efe4;
+  --pbm-ink: #2f2115;
+  --pbm-brown: #6b4226;
+  --pbm-leather: #7a4a2b;
+  --pbm-leather-dark: #5c3620;
+  --pbm-gold: #c9a66b;
+  --pbm-error: #a3402c;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+.login-page {
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  font-family: "Lora", serif;
+}
+
+.login-page__image {
+  object-fit: cover;
+  object-position: center;
+  z-index: 0;
+}
+
+/* Subtle darkening on the right side of the photo so the card reads clearly */
+.login-page__overlay {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  background: linear-gradient(
+    to right,
+    rgba(20, 14, 10, 0) 55%,
+    rgba(20, 14, 10, 0.35) 75%,
+    rgba(20, 14, 10, 0.45) 100%
+  );
+  pointer-events: none;
+}
+
+.login-panel {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  max-width: 460px;
+  padding: 0 6vw 0 0;
+  display: flex;
+  justify-content: center;
+}
+
+.login-card {
+  position: relative;
+  width: 100%;
+  max-width: 400px;
+  background: rgba(246, 239, 228, 0.97);
+  border-radius: 22px;
+  padding: 44px 40px 36px;
+  box-shadow: 0 24px 60px rgba(20, 14, 10, 0.35), 0 2px 6px rgba(20, 14, 10, 0.12);
+  backdrop-filter: blur(6px);
+}
+
+/* Signature element: a small bookmark ribbon tucked into the card,
+   echoing the open-book motif from the illustration */
+.login-card__ribbon {
+  position: absolute;
+  top: -14px;
+  left: 36px;
+  width: 26px;
+  height: 46px;
+  background: linear-gradient(180deg, var(--pbm-leather) 0%, var(--pbm-leather-dark) 100%);
+  clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 78%, 0 100%);
+  box-shadow: 0 6px 10px rgba(20, 14, 10, 0.25);
+}
+
+.login-card__header {
+  margin-bottom: 28px;
+}
+
+.login-card__eyebrow {
+  display: block;
+  font-family: "Lora", serif;
+  font-size: 12px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--pbm-gold);
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+
+.login-card__title {
+  font-family: "Playfair Display", serif;
+  font-size: 30px;
+  font-weight: 700;
+  color: var(--pbm-ink);
+  margin: 0 0 8px;
+}
+
+.login-card__subtitle {
+  font-size: 14.5px;
+  color: #6b5a48;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.login-form {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.login-form__field {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.login-form__label {
+  font-size: 12.5px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--pbm-brown);
+  font-weight: 500;
+}
+
+.login-form__input {
+  border: 1px solid rgba(107, 66, 38, 0.25);
+  background: #fffaf2;
+  border-radius: 10px;
+  padding: 12px 14px;
+  font-size: 15px;
+  font-family: "Lora", serif;
+  color: var(--pbm-ink);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  width: 100%;
+}
+
+.login-form__input::placeholder {
+  color: #b8a68e;
+}
+
+.login-form__input:focus {
+  outline: none;
+  border-color: var(--pbm-leather);
+  box-shadow: 0 0 0 3px rgba(122, 74, 43, 0.15);
+}
+
+.login-form__password-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.login-form__password-wrap .login-form__input {
+  padding-right: 58px;
+}
+
+.login-form__toggle {
+  position: absolute;
+  right: 10px;
+  background: none;
+  border: none;
+  font-size: 12.5px;
+  color: var(--pbm-leather);
+  font-family: "Lora", serif;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 4px 6px;
+}
+
+.login-form__toggle:hover {
+  text-decoration: underline;
+}
+
+.login-form__error {
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--pbm-error);
+  background: rgba(163, 64, 44, 0.08);
+  border: 1px solid rgba(163, 64, 44, 0.25);
+  border-radius: 8px;
+  padding: 9px 12px;
+}
+
+.login-form__submit {
+  margin-top: 4px;
+  background: linear-gradient(180deg, var(--pbm-leather) 0%, var(--pbm-leather-dark) 100%);
+  color: #fdf6ea;
+  border: none;
+  border-radius: 10px;
+  padding: 13px 16px;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: "Lora", serif;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
+  box-shadow: 0 10px 20px rgba(92, 54, 32, 0.3);
+}
+
+.login-form__submit:hover:not(:disabled) {
+  transform: translateY(-1px);
+  box-shadow: 0 14px 24px rgba(92, 54, 32, 0.35);
+}
+
+.login-form__submit:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.login-form__hint {
+  margin: 4px 0 0;
+  text-align: center;
+  font-size: 12.5px;
+  color: #8a7a64;
+}
+
+.login-form__hint strong {
+  color: var(--pbm-brown);
+}
+
+/* Responsive: stack card centered on smaller screens */
+@media (max-width: 860px) {
+  .login-page {
+    justify-content: center;
+    align-items: flex-end;
+    padding-bottom: 6vh;
+  }
+
+  .login-page__overlay {
+    background: linear-gradient(
+      to bottom,
+      rgba(20, 14, 10, 0.15) 0%,
+      rgba(20, 14, 10, 0.55) 65%,
+      rgba(20, 14, 10, 0.65) 100%
+    );
+  }
+
+  .login-panel {
+    max-width: 92%;
+    padding: 0;
+  }
+
+  .login-card {
+    padding: 36px 28px 30px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .login-form__submit {
+    transition: none;
+  }
+}
