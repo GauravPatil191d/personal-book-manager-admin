@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { useRouter } from "next/navigation";
 import { Book, BookStatus } from "@/types/book";
-import { INITIAL_BOOKS } from "@/data/mockBooks";
 import { Navbar } from "@/components/navbar";
 import { Header } from "@/components/header";
 import { useBooks } from "@/context/book-context";
@@ -29,9 +28,9 @@ export const DashboardContainer: React.FC = () => {
   } = useBooks();
 
   const [activeTab, setActiveTab] = useState<string>("dashboard");
-  const [books, setBooks] = useState<Book[]>(INITIAL_BOOKS);
+  const [books, setBooks] = useState<Book[]>([]);
   const [searchQuery, setSearchQuery] = useState<string>("");
-  const [libraryTab, setLibraryTab] = useState<"All" | "Read" | "Pending">("All");
+  const [libraryTab, setLibraryTab] = useState<"All Books" | "Completed" | "Reading" | "Pending">("All Books");
   const [selectedTag, setSelectedTag] = useState<string>("All");
 
   // Modals & State
@@ -70,11 +69,23 @@ export const DashboardContainer: React.FC = () => {
       const fetched = Array.isArray(res)
         ? res
         : res?.books || res?.data || res?.booksList || [];
-      if (Array.isArray(fetched) && fetched.length > 0) {
-        setBooks(fetched);
+      if (Array.isArray(fetched)) {
+        setBooks((prevBooks) => {
+          return fetched.map((fBook: any) => {
+            const prev = prevBooks.find(
+              (p) =>
+                p.book_generated_id === fBook.book_generated_id ||
+                (p._id?.$oid && fBook._id?.$oid && p._id.$oid === fBook._id.$oid)
+            );
+            return {
+              ...fBook,
+              cover_image: fBook.cover_image || (prev ? prev.cover_image : ""),
+            };
+          });
+        });
       }
     } catch (err) {
-      console.log("Could not fetch backend books, using local cache", err);
+      console.log("Could not fetch backend books", err);
     }
   };
 
@@ -94,20 +105,23 @@ export const DashboardContainer: React.FC = () => {
   // Stats Calculations
   const totalBooksCount = books.length;
   const booksReadCount = books.filter((b) => b.status === "Completed").length;
-  const booksPendingCount = books.filter((b) => b.status === "Reading" || b.status === "Plan to Read").length;
+  const booksReadingCount = books.filter((b) => b.status === "Reading").length;
+  const booksPendingCount = books.filter(
+    (b) => (b.status as string) === "Plan to Read" || (b.status as string) === "Pending"
+  ).length;
   const recentlyAddedBooks = useMemo(() => {
     return [...books].slice(0, 3);
   }, [books]);
 
-  // Filter books based on search query, selected library status tab, and selected tag
+  // Filter books based on search query, selected status tab (All Books, Completed, Reading, Pending), and selected tag
   const filteredBooks = useMemo(() => {
     const searchLower = searchQuery.toLowerCase().trim();
     return books.filter((book) => {
       const tagsList = Array.isArray(book.tags)
         ? book.tags
         : typeof book.tags === "string"
-          ? (book.tags as string).split(",").map((t) => t.trim())
-          : [];
+        ? (book.tags as string).split(",").map((t) => t.trim())
+        : [];
 
       const matchesSearch =
         searchLower === "" ||
@@ -118,10 +132,12 @@ export const DashboardContainer: React.FC = () => {
         tagsList.some((t) => t.toLowerCase().includes(searchLower));
 
       let matchesTab = true;
-      if (libraryTab === "Read") {
+      if (libraryTab === "Completed") {
         matchesTab = book.status === "Completed";
+      } else if (libraryTab === "Reading") {
+        matchesTab = book.status === "Reading";
       } else if (libraryTab === "Pending") {
-        matchesTab = book.status === "Reading" || book.status === "Plan to Read";
+        matchesTab = (book.status as string) === "Plan to Read" || (book.status as string) === "Pending";
       }
 
       let matchesTag = true;
@@ -159,20 +175,34 @@ export const DashboardContainer: React.FC = () => {
       formData.append("title", selectedBook.title);
       formData.append("author", selectedBook.author);
       formData.append("status", selectedBook.status);
+      formData.append("description", selectedBook.description || "");
+      if (selectedBook.cover_image) {
+        formData.append("cover_image", selectedBook.cover_image);
+      }
+      if (Array.isArray(selectedBook.tags)) {
+        formData.append("tags", selectedBook.tags.join(", "));
+      } else if (typeof selectedBook.tags === "string") {
+        formData.append("tags", selectedBook.tags);
+      }
 
       await updateBookContext(formData);
       await fetchBooks();
 
-      setSelectedBook({ ...selectedBook, notes: editingNotes });
+      setSelectedBook((prev) =>
+        prev ? { ...prev, notes: editingNotes, cover_image: prev.cover_image || selectedBook.cover_image } : null
+      );
       setIsEditingNotesModal(false);
     } catch (err: any) {
-      const updated = books.map((b) =>
-        b.book_generated_id === selectedBook.book_generated_id || b._id.$oid === selectedBook._id.$oid
-          ? { ...b, notes: editingNotes }
-          : b
+      setBooks((prev) =>
+        prev.map((b) =>
+          b.book_generated_id === selectedBook.book_generated_id || b._id.$oid === selectedBook._id.$oid
+            ? { ...b, notes: editingNotes, cover_image: b.cover_image || selectedBook.cover_image }
+            : b
+        )
       );
-      setBooks(updated);
-      setSelectedBook({ ...selectedBook, notes: editingNotes });
+      setSelectedBook((prev) =>
+        prev ? { ...prev, notes: editingNotes, cover_image: prev.cover_image || selectedBook.cover_image } : null
+      );
       setIsEditingNotesModal(false);
     } finally {
       setIsSubmitting(false);
@@ -186,19 +216,35 @@ export const DashboardContainer: React.FC = () => {
       formData.append("status", newStat);
       formData.append("title", book.title);
       formData.append("author", book.author);
+      formData.append("description", book.description || "");
+      formData.append("notes", book.notes || "");
+      if (book.cover_image) {
+        formData.append("cover_image", book.cover_image);
+      }
+      if (Array.isArray(book.tags)) {
+        formData.append("tags", book.tags.join(", "));
+      } else if (typeof book.tags === "string") {
+        formData.append("tags", book.tags);
+      }
 
       await updateBookContext(formData);
       await fetchBooks();
     } catch (err) {
-      const updated = books.map((b) =>
-        b.book_generated_id === book.book_generated_id || b._id.$oid === book._id.$oid
-          ? { ...b, status: newStat }
-          : b
+      setBooks((prev) =>
+        prev.map((b) =>
+          b.book_generated_id === book.book_generated_id || b._id.$oid === book._id.$oid
+            ? { ...b, status: newStat, cover_image: b.cover_image || book.cover_image }
+            : b
+        )
       );
-      setBooks(updated);
     } finally {
-      if (selectedBook && (selectedBook.book_generated_id === book.book_generated_id || selectedBook._id.$oid === book._id.$oid)) {
-        setSelectedBook({ ...selectedBook, status: newStat });
+      if (
+        selectedBook &&
+        (selectedBook.book_generated_id === book.book_generated_id || selectedBook._id.$oid === book._id.$oid)
+      ) {
+        setSelectedBook((prev) =>
+          prev ? { ...prev, status: newStat, cover_image: prev.cover_image || book.cover_image } : null
+        );
       }
     }
   };
@@ -211,10 +257,11 @@ export const DashboardContainer: React.FC = () => {
       await fetchBooks();
       setSelectedBook(null);
     } catch (err) {
-      const updated = books.filter(
-        (b) => b.book_generated_id !== book.book_generated_id && b._id.$oid !== book._id.$oid
+      setBooks((prev) =>
+        prev.filter(
+          (b) => b.book_generated_id !== book.book_generated_id && b._id.$oid !== book._id.$oid
+        )
       );
-      setBooks(updated);
       setSelectedBook(null);
     } finally {
       setIsSubmitting(false);
@@ -275,7 +322,7 @@ export const DashboardContainer: React.FC = () => {
         created_at: { $date: createdIso },
         updated_at: { $date: createdIso },
       };
-      setBooks([newBookItem, ...books]);
+      setBooks((prev) => [newBookItem, ...prev]);
       setIsAddModalOpen(false);
     } finally {
       setIsSubmitting(false);
@@ -317,7 +364,7 @@ export const DashboardContainer: React.FC = () => {
             </div>
           </div>
 
-          {/* Stats Grid - Clean Professional SVG Icons */}
+          {/* Stats Grid */}
           <div className="woody-stats-grid">
             <div className="woody-stat-card">
               <div className="woody-stat-card__icon icon-brown">
@@ -372,67 +419,75 @@ export const DashboardContainer: React.FC = () => {
           </div>
 
           {/* Recently Added Books Showcase */}
-          <section className="woody-section">
-            <div className="woody-section__header">
-              <div>
-                <h2 className="woody-section__title">Recently Added Books</h2>
-                <p className="woody-section__subtitle">Latest additions to your personal library shelf</p>
+          {recentlyAddedBooks.length > 0 && (
+            <section className="woody-section">
+              <div className="woody-section__header">
+                <div>
+                  <h2 className="woody-section__title">Recently Added Books</h2>
+                  <p className="woody-section__subtitle">Latest additions to your personal library shelf</p>
+                </div>
               </div>
-            </div>
 
-            <div className="recent-books-row">
-              {recentlyAddedBooks.map((book) => {
-                const coverSrc = getImageUrl(book.cover_image);
-                return (
-                  <div
-                    key={book._id?.$oid || book.book_generated_id}
-                    className="recent-book-card"
-                    onClick={() => handleOpenDetailModal(book)}
-                  >
-                    <div className="recent-book-cover">
-                      {coverSrc ? (
-                        <img src={coverSrc} alt={book.title} />
-                      ) : (
-                        <div className="book-spine-display">
-                          <span className="spine-title">{book.title}</span>
-                          <span className="spine-author">{book.author}</span>
-                        </div>
-                      )}
+              <div className="recent-books-row">
+                {recentlyAddedBooks.map((book) => {
+                  const coverSrc = getImageUrl(book.cover_image);
+                  return (
+                    <div
+                      key={book._id?.$oid || book.book_generated_id}
+                      className="recent-book-card"
+                      onClick={() => handleOpenDetailModal(book)}
+                    >
+                      <div className="recent-book-cover">
+                        {coverSrc ? (
+                          <img src={coverSrc} alt={book.title} />
+                        ) : (
+                          <div className="book-spine-display">
+                            <span className="spine-title">{book.title}</span>
+                            <span className="spine-author">{book.author}</span>
+                          </div>
+                        )}
+                      </div>
+                      <div className="recent-book-info">
+                        <span className="recent-book-title">{book.title}</span>
+                        <span className="recent-book-author">by {book.author}</span>
+                        <span className={`status-pill status-${book.status.toLowerCase().replace(/\s+/g, "-")}`}>
+                          {book.status}
+                        </span>
+                      </div>
                     </div>
-                    <div className="recent-book-info">
-                      <span className="recent-book-title">{book.title}</span>
-                      <span className="recent-book-author">by {book.author}</span>
-                      <span className={`status-pill status-${book.status.toLowerCase().replace(/\s+/g, "-")}`}>
-                        {book.status}
-                      </span>
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-          </section>
+                  );
+                })}
+              </div>
+            </section>
+          )}
 
           {/* "Your Books" Library Shelf Section */}
           <section className="woody-section" id="your-books">
             <div className="woody-section__header">
               <div>
                 <h2 className="woody-section__title">Your Bookshelf</h2>
-                <p className="woody-section__subtitle">Browse and search your collection on your personal 3D library shelf</p>
+                <p className="woody-section__subtitle">Browse your collection on your personal 3D library shelf</p>
               </div>
 
-              {/* Main Library Status Tabs */}
+              {/* Status Filter Tabs: All Books, Completed, Reading, Pending */}
               <div className="woody-tabs">
                 <button
-                  className={`woody-tab ${libraryTab === "All" ? "woody-tab--active" : ""}`}
-                  onClick={() => setLibraryTab("All")}
+                  className={`woody-tab ${libraryTab === "All Books" ? "woody-tab--active" : ""}`}
+                  onClick={() => setLibraryTab("All Books")}
                 >
                   All Books ({totalBooksCount})
                 </button>
                 <button
-                  className={`woody-tab ${libraryTab === "Read" ? "woody-tab--active" : ""}`}
-                  onClick={() => setLibraryTab("Read")}
+                  className={`woody-tab ${libraryTab === "Completed" ? "woody-tab--active" : ""}`}
+                  onClick={() => setLibraryTab("Completed")}
                 >
-                  Read ({booksReadCount})
+                  Completed ({booksReadCount})
+                </button>
+                <button
+                  className={`woody-tab ${libraryTab === "Reading" ? "woody-tab--active" : ""}`}
+                  onClick={() => setLibraryTab("Reading")}
+                >
+                  Reading ({booksReadingCount})
                 </button>
                 <button
                   className={`woody-tab ${libraryTab === "Pending" ? "woody-tab--active" : ""}`}
@@ -444,28 +499,41 @@ export const DashboardContainer: React.FC = () => {
             </div>
 
             {/* Interactive Tag Filter Bar */}
-            <div className="woody-tag-filter-bar">
-              <span className="tag-filter-label">Filter by Tag:</span>
-              <button
-                className={`tag-chip-btn ${selectedTag === "All" ? "tag-chip-btn--active" : ""}`}
-                onClick={() => setSelectedTag("All")}
-              >
-                All Tags
-              </button>
-              {availableTags.map((tag) => (
+            {availableTags.length > 0 && (
+              <div className="woody-tag-filter-bar">
+                <span className="tag-filter-label">Filter by Tag:</span>
                 <button
-                  key={tag}
-                  className={`tag-chip-btn ${selectedTag === tag ? "tag-chip-btn--active" : ""}`}
-                  onClick={() => setSelectedTag(tag)}
+                  className={`tag-chip-btn ${selectedTag === "All" ? "tag-chip-btn--active" : ""}`}
+                  onClick={() => setSelectedTag("All")}
                 >
-                  #{tag}
+                  All Tags
                 </button>
-              ))}
-            </div>
+                {availableTags.map((tag) => (
+                  <button
+                    key={tag}
+                    className={`tag-chip-btn ${selectedTag === tag ? "tag-chip-btn--active" : ""}`}
+                    onClick={() => setSelectedTag(tag)}
+                  >
+                    #{tag}
+                  </button>
+                ))}
+              </div>
+            )}
 
             {/* 3D Wooden Library Shelf Container */}
             <div className="library-shelf-container">
-              {filteredBooks.length === 0 ? (
+              {books.length === 0 ? (
+                <div className="empty-shelf-state">
+                  <div className="empty-icon-wrap">
+                    <svg width="44" height="44" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
+                      <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+                      <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path>
+                    </svg>
+                  </div>
+                  <h3>User doesn&apos;t have any books</h3>
+                  <p>Your library is empty right now. Click &quot;Add New Book&quot; to add your first book!</p>
+                </div>
+              ) : filteredBooks.length === 0 ? (
                 <div className="empty-shelf-state">
                   <div className="empty-icon-wrap">
                     <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
@@ -473,8 +541,8 @@ export const DashboardContainer: React.FC = () => {
                       <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
                     </svg>
                   </div>
-                  <h3>No books match your filter</h3>
-                  <p>Try clearing tags, switching status tabs, or searching for another title.</p>
+                  <h3>No books match your search or filter</h3>
+                  <p>Try clearing your search query or tag filter to view your books.</p>
                 </div>
               ) : (
                 <div className="shelf-grid">
@@ -483,8 +551,8 @@ export const DashboardContainer: React.FC = () => {
                     const bookTags = Array.isArray(book.tags)
                       ? book.tags
                       : typeof book.tags === "string"
-                        ? (book.tags as string).split(",").map((t) => t.trim())
-                        : [];
+                      ? (book.tags as string).split(",").map((t) => t.trim())
+                      : [];
 
                     return (
                       <div key={book._id?.$oid || book.book_generated_id} className="shelf-item">
@@ -571,8 +639,8 @@ export const DashboardContainer: React.FC = () => {
                     {(Array.isArray(selectedBook.tags)
                       ? selectedBook.tags
                       : typeof selectedBook.tags === "string"
-                        ? (selectedBook.tags as string).split(",")
-                        : []
+                      ? (selectedBook.tags as string).split(",")
+                      : []
                     ).map((t) => (
                       <span key={t} className="shelf-tag-chip">#{t.trim()}</span>
                     ))}
@@ -617,7 +685,6 @@ export const DashboardContainer: React.FC = () => {
                 </div>
                 <div className="modal-notes-quote">&ldquo;{selectedBook.notes || "No notes added yet."}&rdquo;</div>
               </div>
-
             </div>
 
             <div className="woody-modal__footer" style={{ justifyContent: "space-between" }}>

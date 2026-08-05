@@ -25,10 +25,10 @@ interface RegisterForm {
    Pre‑filled demo data
    ────────────────────────────────────────────── */
 const PRE_FILLED: RegisterForm = {
-  name: "Gaurav Patil",
-  email: "gaurav@gmail.com",
-  mobile: "9876543210",
-  password: "Password@123",
+  name: "",
+  email: "",
+  mobile: "",
+  password: "",
 };
 
 /* ──────────────────────────────────────────────
@@ -309,10 +309,6 @@ const Login: React.FC = () => {
                     </span>
                     <span className="login-remember__text">Remember Me</span>
                   </label>
-
-                  <a href="/forgot-password" className="login-forgot">
-                    Forgot Password?
-                  </a>
                 </div>
 
                 {error && (

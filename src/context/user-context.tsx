@@ -41,7 +41,7 @@ export const UserProvider = ({
             setLoading(true);
 
             const response = await axiosClient.post(
-                "/users/create-user",
+                "/user/create-user",
                 {
                     name,
                     email,
