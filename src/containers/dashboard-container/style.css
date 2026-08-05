@@ -1,0 +1,846 @@
+/* Dashboard Container Styles - Refined Off-White Canvas & 3D Wood Shelf Theme */
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,400&family=Inter:wght@400;500;600;700&display=swap");
+
+.woody-layout {
+  display: flex;
+  min-height: 100vh;
+  background: #FAF8F5;
+  color: #2D1A10;
+  font-family: "Inter", sans-serif;
+}
+
+.woody-main-wrapper {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  background: #FAF8F5;
+}
+
+.woody-content {
+  padding: 32px 36px;
+  max-width: 1400px;
+  width: 100%;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 36px;
+}
+
+/* ============================================
+   Welcome Banner
+   ============================================ */
+.woody-banner {
+  border-radius: 20px;
+  padding: 28px 32px;
+  background: linear-gradient(135deg, #3D2314 0%, #24140D 100%);
+  color: #F7F3E9;
+  box-shadow: 0 8px 24px rgba(42, 23, 15, 0.15);
+  border: 1px solid #5C3A21;
+}
+
+.woody-banner__top {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.woody-banner__date {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: #A89078;
+  font-weight: 600;
+}
+
+.woody-banner__streak {
+  font-size: 12px;
+  padding: 3px 10px;
+  border-radius: 12px;
+  background: rgba(212, 175, 55, 0.15);
+  border: 1px solid rgba(212, 175, 55, 0.3);
+  color: #D4AF37;
+  font-weight: 600;
+}
+
+.woody-banner__title {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 34px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  line-height: 1.15;
+}
+
+.woody-banner__subtitle {
+  font-size: 14px;
+  color: #CBBAB0;
+  margin-top: 4px;
+}
+
+/* ============================================
+   Stats Grid
+   ============================================ */
+.woody-stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.woody-stat-card {
+  background: #FFF;
+  border: 1.5px solid #EAE1D7;
+  border-radius: 16px;
+  padding: 20px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+}
+
+.woody-stat-card:hover {
+  transform: translateY(-3px);
+  border-color: #8A5B3B;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+}
+
+.woody-stat-card__icon {
+  width: 50px;
+  height: 50px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+
+.icon-brown { background: #F5EFE8; color: #5C3A21; }
+.icon-green { background: #EBF7F2; color: #2E7559; }
+.icon-amber { background: #FAF2E8; color: #8A5B3B; }
+.icon-gold { background: #FDF9E7; color: #B88E14; }
+
+.woody-stat-card__info {
+  display: flex;
+  flex-direction: column;
+}
+
+.woody-stat-card__value {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 32px;
+  font-weight: 700;
+  color: #2D1A10;
+  line-height: 1;
+}
+
+.woody-stat-card__label {
+  font-size: 12px;
+  color: #8C7563;
+  margin-top: 4px;
+  font-weight: 500;
+}
+
+/* ============================================
+   Sections & Section Headers
+   ============================================ */
+.woody-section {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.woody-section__header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  border-bottom: 1.5px solid #EAE1D7;
+  padding-bottom: 12px;
+}
+
+.woody-section__title {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 28px;
+  font-weight: 700;
+  color: #2D1A10;
+  letter-spacing: 0.5px;
+}
+
+.woody-section__subtitle {
+  font-size: 13px;
+  color: #8C7563;
+  margin-top: 2px;
+}
+
+/* ============================================
+   Recently Added Books Showcase
+   ============================================ */
+.recent-books-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.recent-book-card {
+  background: #FFF;
+  border: 1.5px solid #EAE1D7;
+  border-radius: 16px;
+  padding: 16px;
+  display: flex;
+  gap: 16px;
+  align-items: center;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
+  transition: all 0.25s ease;
+}
+
+.recent-book-card:hover {
+  transform: translateY(-3px);
+  border-color: #8A5B3B;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.08);
+}
+
+.recent-book-cover {
+  width: 70px;
+  height: 95px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+  flex-shrink: 0;
+}
+
+.recent-book-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.book-spine-display {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #5C3A21 0%, #2A170F 100%);
+  color: #F7F3E9;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+}
+
+.spine-title {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.spine-author {
+  font-size: 9px;
+  color: #D4AF37;
+  margin-top: 4px;
+}
+
+.recent-book-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.recent-book-title {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #2D1A10;
+  line-height: 1.2;
+}
+
+.recent-book-author {
+  font-size: 12px;
+  color: #8C7563;
+}
+
+.status-pill {
+  display: inline-block;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 3px 8px;
+  border-radius: 6px;
+  margin-top: 4px;
+  width: fit-content;
+}
+
+.status-reading { background: #FAF2E8; color: #8A5B3B; border: 1px solid #E0D0C0; }
+.status-completed { background: #EBF7F2; color: #2E7559; border: 1px solid #C5E5D8; }
+.status-plan-to-read { background: #F3EEFA; color: #6B43A4; border: 1px solid #DDD0F0; }
+
+/* ============================================
+   Your Books Tabs
+   ============================================ */
+.woody-tabs {
+  display: flex;
+  gap: 8px;
+}
+
+.woody-tab {
+  padding: 8px 18px;
+  border-radius: 12px;
+  background: #FFF;
+  border: 1.5px solid #EAE1D7;
+  color: #8C7563;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.woody-tab:hover {
+  color: #2D1A10;
+  border-color: #8A5B3B;
+}
+
+.woody-tab--active {
+  background: #3D2314;
+  color: #F7F3E9;
+  border-color: #3D2314;
+  box-shadow: 0 4px 10px rgba(61, 35, 20, 0.2);
+}
+
+/* ============================================
+   Interactive Tag Filter Bar
+   ============================================ */
+.woody-tag-filter-bar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  background: #FFF;
+  border: 1.5px solid #EAE1D7;
+  border-radius: 14px;
+  padding: 10px 16px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+}
+
+.tag-filter-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: #8C7563;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-right: 4px;
+}
+
+.tag-chip-btn {
+  padding: 5px 12px;
+  border-radius: 20px;
+  background: #FAF8F5;
+  border: 1px solid #E0D5C7;
+  color: #5C3A21;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.tag-chip-btn:hover {
+  background: #F0E8DD;
+  border-color: #8A5B3B;
+}
+
+.tag-chip-btn--active {
+  background: #8A5B3B;
+  color: #FFF;
+  border-color: #8A5B3B;
+  font-weight: 600;
+  box-shadow: 0 2px 8px rgba(138, 91, 59, 0.25);
+}
+
+/* ============================================
+   3D Wooden Library Shelf
+   ============================================ */
+.library-shelf-container {
+  background: linear-gradient(180deg, #F4EFEA 0%, #EFE8DF 100%);
+  border: 2px solid #D5C8B8;
+  border-radius: 20px;
+  padding: 36px 28px 16px 28px;
+  position: relative;
+  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.05);
+}
+
+.shelf-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 28px;
+  padding-bottom: 24px;
+  position: relative;
+  z-index: 2;
+}
+
+.shelf-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.shelf-book-card {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  perspective: 1000px;
+}
+
+.shelf-book-cover {
+  width: 150px;
+  height: 210px;
+  border-radius: 8px;
+  position: relative;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2), 0 2px 6px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.3s ease;
+  transform-origin: bottom center;
+}
+
+.shelf-book-card:hover .shelf-book-cover {
+  transform: translateY(-12px) rotate(-1deg) scale(1.03);
+  box-shadow: 0 20px 32px rgba(0, 0, 0, 0.3), 0 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+.shelf-book-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.book-page-depth {
+  position: absolute;
+  top: 4px;
+  right: -5px;
+  width: 5px;
+  height: calc(100% - 8px);
+  background: linear-gradient(90deg, #EBE3D5 0%, #D8CFC0 100%);
+  border-radius: 0 2px 2px 0;
+  box-shadow: inset 1px 0 2px rgba(0,0,0,0.15);
+}
+
+.shelf-leather-cover {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #5C3A21 0%, #2A170F 100%);
+  border: 2px solid #D4AF37;
+  border-radius: 8px;
+  padding: 16px 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: #F7F3E9;
+}
+
+.leather-frame {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+}
+
+.leather-title {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.leather-author {
+  font-size: 11px;
+  color: #D4AF37;
+}
+
+.shelf-status-tag {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  padding: 3px 6px;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+}
+
+.tag-reading { background: #8A5B3B; color: #FFF; }
+.tag-completed { background: #2E7559; color: #FFF; }
+.tag-plan-to-read { background: #3D2314; color: #D4AF37; border: 1px solid #D4AF37; }
+
+.shelf-book-details {
+  margin-top: 14px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.shelf-title {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 18px;
+  font-weight: 700;
+  color: #2D1A10;
+  line-height: 1.2;
+}
+
+.shelf-author {
+  font-size: 12px;
+  color: #8C7563;
+  margin-top: 2px;
+}
+
+.shelf-tags {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px;
+  margin-top: 6px;
+}
+
+.shelf-tag-chip {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  background: #EAE1D7;
+  color: #5C3A21;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.shelf-tag-chip:hover,
+.shelf-tag-chip--active {
+  background: #8A5B3B;
+  color: #FFF;
+}
+
+/* Real Wooden Shelf Base Plank */
+.shelf-plank {
+  width: 100%;
+  height: 24px;
+  background: linear-gradient(180deg, #5C3A21 0%, #3D2314 60%, #2A170F 100%);
+  border-radius: 4px;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+  position: relative;
+  margin-top: 12px;
+}
+
+.shelf-wood-lip {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: #8A5B3B;
+  border-radius: 4px 4px 0 0;
+}
+
+.empty-shelf-state {
+  text-align: center;
+  padding: 48px 24px;
+  color: #8C7563;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.empty-icon-wrap {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: #EAE1D7;
+  color: #8C7563;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 12px;
+}
+
+/* ============================================
+   Modals & Form
+   ============================================ */
+.woody-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(20, 10, 5, 0.7);
+  backdrop-filter: blur(6px);
+  z-index: 300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.woody-modal {
+  background: #FFF;
+  border: 1.5px solid #EAE1D7;
+  border-radius: 20px;
+  width: 100%;
+  max-width: 560px;
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.3);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: modalFadeIn 0.25s ease-out;
+}
+
+.woody-modal--lg { max-width: 660px; }
+
+@keyframes modalFadeIn {
+  from { opacity: 0; transform: scale(0.96); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.woody-modal__header {
+  padding: 20px 24px;
+  border-bottom: 1px solid #EAE1D7;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #FAF8F5;
+}
+
+.woody-modal__title {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 24px;
+  font-weight: 700;
+  color: #2D1A10;
+}
+
+.woody-modal__close {
+  background: transparent;
+  border: none;
+  color: #8C7563;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.woody-modal__close:hover { color: #2D1A10; }
+
+.woody-modal__body {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+
+.modal-hero {
+  display: flex;
+  gap: 20px;
+  align-items: center;
+}
+
+.modal-hero__cover {
+  width: 90px;
+  height: 125px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  flex-shrink: 0;
+}
+
+.modal-hero__cover img { width: 100%; height: 100%; object-fit: cover; }
+
+.modal-leather-spine {
+  width: 100%;
+  height: 100%;
+  background: #5C3A21;
+  color: #F7F3E9;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+}
+
+.modal-hero__info h3 {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 22px;
+  font-weight: 700;
+  color: #2D1A10;
+}
+
+.modal-author {
+  font-size: 13px;
+  color: #8C7563;
+  margin-top: 2px;
+}
+
+.modal-tags {
+  display: flex;
+  gap: 4px;
+  margin: 8px 0;
+}
+
+.modal-status-select-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #8C7563;
+}
+
+.woody-select {
+  padding: 4px 8px;
+  border-radius: 6px;
+  border: 1px solid #E0D5C7;
+  font-size: 12px;
+  outline: none;
+}
+
+.modal-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.modal-field label {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #8C7563;
+}
+
+.modal-field-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.edit-notes-link {
+  background: transparent;
+  border: none;
+  color: #8A5B3B;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.modal-notes-quote {
+  background: #F9F6F0;
+  border-left: 3px solid #8A5B3B;
+  padding: 12px;
+  border-radius: 6px;
+  font-family: "Cormorant Garamond", serif;
+  font-style: italic;
+  font-size: 16px;
+  color: #2D1A10;
+}
+
+.modal-meta-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  background: #FAF8F5;
+  padding: 12px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.form-row-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.woody-input,
+.woody-textarea {
+  width: 100%;
+  padding: 10px 14px;
+  background: #FFF;
+  border: 1.5px solid #E0D5C7;
+  border-radius: 8px;
+  color: #2D1A10;
+  font-family: "Inter", sans-serif;
+  font-size: 14px;
+}
+
+.woody-input:focus,
+.woody-textarea:focus {
+  outline: none;
+  border-color: #8A5B3B;
+}
+
+.thumbnail-preview-box {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 8px;
+  font-size: 12px;
+  color: #8C7563;
+}
+
+.thumbnail-preview-box img {
+  width: 50px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 6px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+.woody-modal__footer {
+  padding: 16px 24px;
+  border-top: 1px solid #EAE1D7;
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  background: #FAF8F5;
+}
+
+.woody-btn-secondary {
+  padding: 10px 18px;
+  border-radius: 8px;
+  background: #FFF;
+  border: 1px solid #E0D5C7;
+  color: #5C3A21;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.woody-btn-primary {
+  padding: 10px 20px;
+  border-radius: 8px;
+  background: #3D2314;
+  border: 1px solid #3D2314;
+  color: #FFF;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.woody-btn-delete {
+  padding: 10px 18px;
+  border-radius: 8px;
+  background: #FFF5F5;
+  border: 1px solid #FFD0D0;
+  color: #D9304E;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.woody-btn-delete:hover {
+  background: #FFE5E5;
+  border-color: #D9304E;
+}
+
+.api-error-alert {
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: #FFF5F5;
+  border: 1px solid #FFD0D0;
+  color: #D9304E;
+  font-size: 13px;
+  font-weight: 500;
+}
